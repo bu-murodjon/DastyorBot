@@ -1023,7 +1023,108 @@ async def statistics(message: Message):
     )
 
     await message.answer(text)
-        
+
+# =========================
+# ORDER SEARCH
+# =========================
+
+@dp.message(F.text.startswith("/find"))
+async def find_order(message: Message):
+
+    if message.from_user.id != ADMIN_ID:
+        return
+
+    try:
+
+        query = message.text.replace(
+            "/find",
+            ""
+        ).strip()
+
+    except:
+
+        await message.answer(
+            "❌ Format:\n/find ID yoki ism"
+        )
+
+        return
+
+    # =========================
+    # ID BO'YICHA
+    # =========================
+
+    if query.isdigit():
+
+        cursor.execute(
+            """
+            SELECT id,
+                   full_name,
+                   phone,
+                   order_text,
+                   status,
+                   courier
+            FROM orders
+            WHERE id = ?
+            """,
+            (int(query),)
+        )
+
+    else:
+
+        # =========================
+        # ISM BO'YICHA
+        # =========================
+
+        cursor.execute(
+            """
+            SELECT id,
+                   full_name,
+                   phone,
+                   order_text,
+                   status,
+                   courier
+            FROM orders
+            WHERE full_name LIKE ?
+            ORDER BY id DESC
+            """,
+            (f"%{query}%",)
+        )
+
+    orders = cursor.fetchall()
+
+    if not orders:
+
+        await message.answer(
+            "📭 Hech narsa topilmadi."
+        )
+
+        return
+
+    text = "🔎 <b>QIDIRUV NATIJASI</b>\n\n"
+
+    for order in orders:
+
+        status = order[4]
+
+        if not status:
+            status = "🆕 Yangi"
+
+        courier = order[5]
+
+        if not courier:
+            courier = "Biriktirilmagan"
+
+        text += (
+            f"🆔 #{order[0]}\n"
+            f"👤 {order[1]}\n"
+            f"📞 {order[2]}\n"
+            f"🛒 {order[3]}\n"
+            f"📌 {status}\n"
+            f"🛵 {courier}\n\n"
+        )
+
+    await message.answer(text)
+            
 # =========================
 # ISHGA TUSHIRISH
 # =========================
