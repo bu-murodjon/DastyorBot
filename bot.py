@@ -738,9 +738,11 @@ async def assign_courier(message: Message):
         courier_name = parts[2]
 
     except:
+
         await message.answer(
             "❌ Format:\n/assign ID courier"
         )
+
         return
 
     # =========================
@@ -763,7 +765,7 @@ async def assign_courier(message: Message):
 
     cursor.execute(
         """
-        SELECT full_name, phone, order_text
+        SELECT *
         FROM orders
         WHERE id = ?
         """,
@@ -801,30 +803,70 @@ async def assign_courier(message: Message):
     db.commit()
 
     # =========================
-    # KURYERGA YUBORISH
+    # ORDER INFO
+    # =========================
+
+    order_id = order[0]
+    customer_name = order[2]
+    customer_username = order[3]
+    customer_phone = order[4]
+    order_text = order[5]
+    latitude = order[6]
+    longitude = order[7]
+    status = order[8]
+    created_at = order[9]
+
+    location_link = (
+        f"https://maps.google.com/?q="
+        f"{latitude},{longitude}"
+    )
+
+    # =========================
+    # COURIER TEXT
     # =========================
 
     courier_text = (
-        f"🛵 <b>YANGI BUYURTMA</b>\n\n"
+        f"🚚 <b>YANGI YETKAZMA</b>\n\n"
 
-        f"🆔 Buyurtma: #{order_id}\n\n"
+        f"🕒 Vaqt: {created_at}\n\n"
 
-        f"👤 Mijoz: {order[0]}\n"
-        f"📞 Telefon: {order[1]}\n\n"
+        f"🆔 Buyurtma ID: #{order_id}\n\n"
+
+        f"👤 Mijoz: {customer_name}\n"
+        f"📱 Username: {customer_username}\n"
+        f"📞 Telefon: {customer_phone}\n\n"
 
         f"🛒 Buyurtma:\n"
-        f"{order[2]}"
+        f"{order_text}\n\n"
+
+        f"📍 Lokatsiya:\n"
+        f"{location_link}\n\n"
+
+        f"📌 Status: 🛵 Kuryerga berildi"
     )
+
+    # =========================
+    # SEND TO COURIER
+    # =========================
 
     await bot.send_message(
         courier_id,
         courier_text
     )
 
-    await message.answer(
-        "✅ Buyurtma kuryerga biriktirildi."
+    await bot.send_location(
+        courier_id,
+        latitude=float(latitude),
+        longitude=float(longitude)
     )
 
+    # =========================
+    # ADMIN MESSAGE
+    # =========================
+
+    await message.answer(
+        f"✅ Buyurtma {courier_name} ga biriktirildi."
+    )
 # =========================
 # KURYER BUYURTMALARI
 # =========================
