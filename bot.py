@@ -189,8 +189,26 @@ async def get_location(message: Message, state: FSMContext):
         username_text = "Username yo'q"
 
     # =========================
-    # DATABASE
+    # LOCATION
     # =========================
+
+    location = message.location
+
+    latitude = str(location.latitude)
+    longitude = str(location.longitude)
+
+    location_link = (
+        f"https://maps.google.com/?q="
+        f"{latitude},{longitude}"
+    )
+
+    # =========================
+    # SAVE DATABASE
+    # =========================
+
+    current_time_db = datetime.now().strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
 
     cursor.execute(
         """
@@ -202,7 +220,7 @@ async def get_location(message: Message, state: FSMContext):
             order_text,
             latitude,
             longitude,
-            status
+            status,
             created_at
         )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -213,10 +231,10 @@ async def get_location(message: Message, state: FSMContext):
             username_text,
             data["phone"],
             data["order"],
-            str(message.location.latitude),
-            str(message.location.longitude),
+            latitude,
+            longitude,
             "🆕 Yangi",
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            current_time_db
         )
     )
 
@@ -225,47 +243,51 @@ async def get_location(message: Message, state: FSMContext):
     order_id = cursor.lastrowid
 
     # =========================
-    # ADMIN XABARI
+    # ADMIN MESSAGE
     # =========================
 
-    current_time = datetime.now().strftime("%d.%m.%Y %H:%M")
+    current_time = datetime.now().strftime(
+        "%d.%m.%Y %H:%M"
+    )
 
     admin_text = (
         f"📦 <b>YANGI BUYURTMA</b>\n\n"
+
         f"🕒 Vaqt: {current_time}\n\n"
+
         f"🆔 Buyurtma ID: #{order_id}\n\n"
+
         f"👤 Mijoz: {data['name']}\n"
         f"📱 Username: {username_text}\n"
         f"📞 Telefon: {data['phone']}\n\n"
+
         f"🛒 Buyurtma:\n"
         f"{data['order']}\n\n"
+
+        f"📍 Lokatsiya:\n"
+        f"{location_link}\n\n"
+
         f"📌 Status: 🆕 Yangi"
     )
 
     # =========================
-    # LOCATION
+    # SEND TO ADMIN
     # =========================
 
-    location = message.location
-
-    location_link = (
-        f"https://maps.google.com/?q="
-        f"{location.latitude},"
-        f"{location.longitude}"
-    )
-
-    # ADMINGA TEXT
     await bot.send_message(
         ADMIN_ID,
-        admin_text + f"\n\n📍 Lokatsiya:\n{location_link}"
+        admin_text
     )
 
-    # ADMINGA LIVE LOCATION
     await bot.send_location(
         ADMIN_ID,
         latitude=location.latitude,
         longitude=location.longitude
     )
+
+    # =========================
+    # USER MESSAGE
+    # =========================
 
     await message.answer(
         "✅ Buyurtmangiz qabul qilindi!\n\n"
