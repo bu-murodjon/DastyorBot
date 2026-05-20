@@ -49,6 +49,19 @@ admin_keyboard = ReplyKeyboardMarkup(
 )
 
 # =========================
+# ORQAGA
+# =========================
+
+back_keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="⬅️ Orqaga")
+        ]
+    ],
+    resize_keyboard=True
+)
+
+# =========================
 # TELEFON
 # =========================
 
@@ -56,9 +69,12 @@ phone_keyboard = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(
-                text="📞 Raqamni yuborish",
+                text="📞 Telefon yuborish",
                 request_contact=True
             )
+        ],
+        [
+            KeyboardButton(text="⬅️ Orqaga")
         ]
     ],
     resize_keyboard=True
@@ -75,6 +91,9 @@ location_keyboard = ReplyKeyboardMarkup(
                 text="📍 Lokatsiya yuborish",
                 request_location=True
             )
+        ],
+        [
+            KeyboardButton(text="⬅️ Orqaga")
         ]
     ],
     resize_keyboard=True
@@ -90,15 +109,6 @@ courier_keyboard = ReplyKeyboardMarkup(
             KeyboardButton(
                 text="📦 Mening buyurtmalarim"
             )
-        ]
-    ],
-    resize_keyboard=True
-)
-
-back_keyboard = ReplyKeyboardMarkup(
-    keyboard=[
-        [
-            KeyboardButton(text="⬅️ Orqaga")
         ]
     ],
     resize_keyboard=True

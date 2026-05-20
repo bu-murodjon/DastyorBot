@@ -116,6 +116,16 @@ async def start_handler(message: Message):
         reply_markup=main_keyboard
     )
 
+@dp.message(F.text == "⬅️ Orqaga")
+async def back_handler(message: Message, state: FSMContext):
+
+    await state.clear()
+
+    await message.answer(
+        "🏠 Bosh menyu",
+        reply_markup=main_keyboard
+    )
+
 # =========================
 # BUYURTMA BERISH
 # =========================
@@ -150,7 +160,7 @@ async def order_text(message: Message, state: FSMContext):
 
     await message.answer(
         "📞 Telefon raqamingizni yuboring.",
-        reply_markup=back_keyboard
+        reply_markup=phone_keyboard
     )
 
 # =========================
@@ -168,7 +178,7 @@ async def get_phone(message: Message, state: FSMContext):
 
     await message.answer(
         "📍 Endi lokatsiyangizni yuboring.",
-        reply_markup=back_keyboard
+        reply_markup=location_keyboard
     )
 
 # =========================
@@ -199,8 +209,8 @@ async def get_location(message: Message, state: FSMContext):
     longitude = str(location.longitude)
 
     location_link = (
-    f"https://www.google.com/maps?q="
-    f"{latitude},{longitude}"
+        f"https://www.google.com/maps?q="
+        f"{latitude},{longitude}"
     )
 
     # =========================
@@ -812,10 +822,12 @@ async def assign_courier(message: Message):
     customer_username = order[3]
     customer_phone = order[4]
     order_text = order[5]
-    latitude = order[6]
-    longitude = order[7]
-    status = order[8]
-    created_at = order[9]
+
+    latitude = order[7]
+    longitude = order[8]
+
+    status = order[9]
+    created_at = order[10]
 
     location_link = (
         f"https://maps.google.com/?q="
@@ -855,11 +867,20 @@ async def assign_courier(message: Message):
         courier_text
     )
 
-    await bot.send_location(
-        courier_id,
-        latitude=float(latitude),
-        longitude=float(longitude)
-    )
+    if latitude and longitude:
+
+        await bot.send_location(
+            courier_id,
+            latitude=float(latitude),
+            longitude=float(longitude)
+        )
+
+    else:
+
+        await bot.send_message(
+            courier_id,
+            "❌ Lokatsiya topilmadi."
+        )
 
     # =========================
     # ADMIN MESSAGE
@@ -894,7 +915,7 @@ async def courier_orders(message: Message):
 
     cursor.execute(
         """
-        SELECT id, full_name, phone, order_text, status
+        SELECT *
         FROM orders
         WHERE courier = ?
         AND status != '✅ Yetkazildi'
