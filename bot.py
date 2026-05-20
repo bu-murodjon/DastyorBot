@@ -203,8 +203,9 @@ async def get_location(message: Message, state: FSMContext):
             latitude,
             longitude,
             status
+            created_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             user_id,
@@ -214,7 +215,8 @@ async def get_location(message: Message, state: FSMContext):
             data["order"],
             str(message.location.latitude),
             str(message.location.longitude),
-            "🆕 Yangi"
+            "🆕 Yangi",
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
     )
 
@@ -962,85 +964,105 @@ async def statistics(message: Message):
     if message.from_user.id != ADMIN_ID:
         return
 
+    today = datetime.now().strftime("%Y-%m-%d")
+    current_date = datetime.now().strftime("%d.%m.%Y")
+
+    # =========================
+    # BUGUNGI BUYURTMALAR
+    # =========================
+
+    cursor.execute(
+        """
+        SELECT COUNT(*)
+        FROM orders
+        WHERE created_at LIKE ?
+        """,
+        (today + "%",)
+    )
+
+    total_today = cursor.fetchone()[0]
+
     # =========================
     # YANGI
     # =========================
 
-    cursor.execute("""
-    SELECT COUNT(*)
-    FROM orders
-    WHERE status IS NULL
-    OR status = ''
-    OR status = '🆕 Yangi'
-    """)
+    cursor.execute(
+        """
+        SELECT COUNT(*)
+        FROM orders
+        WHERE status = ?
+        AND created_at LIKE ?
+        """,
+        ("🆕 Yangi", today + "%")
+    )
 
     new_orders = cursor.fetchone()[0]
 
     # =========================
-    # JARAYON
+    # JARAYONDA
     # =========================
 
-    cursor.execute("""
-    SELECT COUNT(*)
-    FROM orders
-    WHERE status = '📦 Tayyorlanmoqda'
-    OR status = '🛵 Kuryerda'
-    OR status = '🛵 Kuryerga berildi'
-    """)
+    cursor.execute(
+        """
+        SELECT COUNT(*)
+        FROM orders
+        WHERE status = ?
+        AND created_at LIKE ?
+        """,
+        ("🛵 Jarayonda", today + "%")
+    )
 
-    processing_orders = cursor.fetchone()[0]
+    in_progress = cursor.fetchone()[0]
 
     # =========================
     # YETKAZILDI
     # =========================
 
-    cursor.execute("""
-    SELECT COUNT(*)
-    FROM orders
-    WHERE status = '✅ Yetkazildi'
-    """)
+    cursor.execute(
+        """
+        SELECT COUNT(*)
+        FROM orders
+        WHERE status = ?
+        AND created_at LIKE ?
+        """,
+        ("✅ Yetkazildi", today + "%")
+    )
 
-    completed_orders = cursor.fetchone()[0]
-
-    # =========================
-    # CANCEL
-    # =========================
-
-    cursor.execute("""
-    SELECT COUNT(*)
-    FROM orders
-    WHERE status = '❌ Bekor qilindi'
-    """)
-
-    cancelled_orders = cursor.fetchone()[0]
+    delivered = cursor.fetchone()[0]
 
     # =========================
-    # SAVOLLAR
+    # BEKOR QILINGAN
     # =========================
 
-    cursor.execute("""
-    SELECT COUNT(*)
-    FROM questions
-    """)
+    cursor.execute(
+        """
+        SELECT COUNT(*)
+        FROM orders
+        WHERE status = ?
+        AND created_at LIKE ?
+        """,
+        ("❌ Bekor qilindi", today + "%")
+    )
 
-    questions_count = cursor.fetchone()[0]
+    cancelled = cursor.fetchone()[0]
 
     # =========================
     # TEXT
     # =========================
 
-    text = (
-        "📊 <b>DASTYOR STATISTIKA</b>\n\n"
+    stats_text = (
+        f"📊 <b>BUGUNGI STATISTIKA</b>\n\n"
+        f"📅 Sana: {current_date}\n\n"
 
-        f"🆕 Yangi buyurtmalar: {new_orders}\n"
-        f"📦 Jarayondagi: {processing_orders}\n"
-        f"✅ Yetkazildi: {completed_orders}\n"
-        f"❌ Bekor qilindi: {cancelled_orders}\n\n"
+        f"📦 Jami buyurtmalar: {total_today}\n\n"
 
-        f"❓ Savollar: {questions_count}"
+        f"🆕 Yangi: {new_orders}\n"
+        f"🛵 Jarayonda: {in_progress}\n"
+        f"✅ Yetkazildi: {delivered}\n"
+        f"❌ Bekor qilingan: {cancelled}"
     )
 
-    await message.answer(text)
+    await message.answer(stats_text)
 
 # =========================
 # ORDER SEARCH

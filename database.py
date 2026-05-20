@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS orders (
     latitude TEXT,
     longitude TEXT,
     status TEXT,
-    courier TEXT
+    created_at TEXT           
+    courier TEXT,
 )
 """)
 
