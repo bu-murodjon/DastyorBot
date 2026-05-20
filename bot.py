@@ -1,5 +1,7 @@
 import asyncio
 
+from flask import Flask
+from threading import Thread
 from datetime import datetime
 from aiogram import Bot, Dispatcher, F
 from aiogram.enums import ParseMode
@@ -1124,7 +1126,24 @@ async def find_order(message: Message):
         )
 
     await message.answer(text)
-            
+
+# =========================
+# FLASK KEEP ALIVE
+# =========================
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Dastyor bot ishlayapti!"
+
+
+def run_web():
+    app.run(
+        host="0.0.0.0",
+        port=10000
+    )
+
 # =========================
 # ISHGA TUSHIRISH
 # =========================
@@ -1132,6 +1151,8 @@ async def find_order(message: Message):
 async def main():
 
     print("🚀 Dastyor bot ishga tushdi...")
+
+    Thread(target=run_web).start()
 
     await dp.start_polling(bot)
 
