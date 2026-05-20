@@ -221,11 +221,13 @@ async def get_location(message: Message, state: FSMContext):
     db.commit()
 
     order_id = cursor.lastrowid
-    
+
     # =========================
     # ADMIN XABARI
     # =========================
+
     current_time = datetime.now().strftime("%d.%m.%Y %H:%M")
+
     admin_text = (
         f"📦 <b>YANGI BUYURTMA</b>\n\n"
         f"🕒 Vaqt: {current_time}\n\n"
@@ -238,15 +240,29 @@ async def get_location(message: Message, state: FSMContext):
         f"📌 Status: 🆕 Yangi"
     )
 
-    await bot.send_message(
-        ADMIN_ID,
-        admin_text
+    # =========================
+    # LOCATION
+    # =========================
+
+    location = message.location
+
+    location_link = (
+        f"https://maps.google.com/?q="
+        f"{location.latitude},"
+        f"{location.longitude}"
     )
 
+    # ADMINGA TEXT
+    await bot.send_message(
+        ADMIN_ID,
+        admin_text + f"\n\n📍 Lokatsiya:\n{location_link}"
+    )
+
+    # ADMINGA LIVE LOCATION
     await bot.send_location(
         ADMIN_ID,
-        latitude=message.location.latitude,
-        longitude=message.location.longitude
+        latitude=location.latitude,
+        longitude=location.longitude
     )
 
     await message.answer(

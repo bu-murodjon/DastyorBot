@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS orders (
     username TEXT,
     phone TEXT,
     order_text TEXT,
+    location TEXT,           
     latitude TEXT,
     longitude TEXT,
     status TEXT,
