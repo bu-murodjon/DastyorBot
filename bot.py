@@ -149,7 +149,7 @@ async def order_text(message: Message, state: FSMContext):
 
     await message.answer(
         "📞 Telefon raqamingizni yuboring.",
-        reply_markup=phone_keyboard
+        reply_markup=back_keyboard
     )
 
 # =========================
@@ -167,7 +167,7 @@ async def get_phone(message: Message, state: FSMContext):
 
     await message.answer(
         "📍 Endi lokatsiyangizni yuboring.",
-        reply_markup=location_keyboard
+        reply_markup=back_keyboard
     )
 
 # =========================
@@ -198,8 +198,8 @@ async def get_location(message: Message, state: FSMContext):
     longitude = str(location.longitude)
 
     location_link = (
-        f"https://maps.google.com/?q="
-        f"{latitude},{longitude}"
+    f"https://www.google.com/maps?q="
+    f"{latitude},{longitude}"
     )
 
     # =========================
@@ -1246,6 +1246,16 @@ def run_web():
         port=10000
     )
 
+@dp.message(F.text == "⬅️ Orqaga")
+async def back_to_menu(message: Message, state: FSMContext):
+
+    await state.clear()
+
+    await message.answer(
+        "🏠 Asosiy menyu",
+        reply_markup=main_keyboard
+    )
+    
 # =========================
 # ISHGA TUSHIRISH
 # =========================

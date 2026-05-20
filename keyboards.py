@@ -94,3 +94,12 @@ courier_keyboard = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True
 )
+
+back_keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="⬅️ Orqaga")
+        ]
+    ],
+    resize_keyboard=True
+)
