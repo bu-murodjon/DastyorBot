@@ -1259,17 +1259,22 @@ async def find_order(message: Message):
 # FLASK
 # =========================
 
+from flask import Flask
+import os
+
 app = Flask(__name__)
 
 @app.route("/")
 def home():
     return "Dastyor bot ishlayapti!"
 
-
 def run_web():
+    port = int(os.environ.get("PORT", 10000))
+
     app.run(
         host="0.0.0.0",
-        port=10000
+        port=port,
+        use_reloader=False
     )
 
 # =========================
