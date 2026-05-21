@@ -1255,6 +1255,10 @@ async def find_order(message: Message):
 # FLASK KEEP ALIVE
 # =========================
 
+# =========================
+# FLASK
+# =========================
+
 app = Flask(__name__)
 
 @app.route("/")
@@ -1268,6 +1272,10 @@ def run_web():
         port=10000
     )
 
+# =========================
+# ORQAGA
+# =========================
+
 @dp.message(F.text == "⬅️ Orqaga")
 async def back_to_menu(message: Message, state: FSMContext):
 
@@ -1277,19 +1285,28 @@ async def back_to_menu(message: Message, state: FSMContext):
         "🏠 Asosiy menyu",
         reply_markup=main_keyboard
     )
-    
+
 # =========================
-# ISHGA TUSHIRISH
+# MAIN
 # =========================
 
 async def main():
 
     print("🚀 Dastyor bot ishga tushdi...")
 
-    Thread(target=run_web).start()
-
     await dp.start_polling(bot)
 
-if __name__ == "__main__":
-    asyncio.run(main())
+# =========================
+# START
+# =========================
 
+if __name__ == "__main__":
+
+    from threading import Thread
+
+    # Flask thread
+    web_thread = Thread(target=run_web)
+    web_thread.start()
+
+    # Telegram bot
+    asyncio.run(main())
