@@ -1290,27 +1290,35 @@ async def back_to_menu(message: Message, state: FSMContext):
 # MAIN
 # =========================
 
+# =========================
+# START
+# =========================
+
 async def main():
 
     print("🚀 Dastyor bot ishga tushdi...")
 
+    # eski webhook/pollinglarni tozalash
     await bot.delete_webhook(
         drop_pending_updates=True
     )
 
-    await dp.start_polling(bot)
-
-# =========================
-# START
-# =========================
+    # polling
+    await dp.start_polling(
+        bot,
+        skip_updates=True
+    )
 
 if __name__ == "__main__":
 
     from threading import Thread
 
-    # Flask thread
-    web_thread = Thread(target=run_web)
+    # Flask server
+    web_thread = Thread(
+        target=run_web,
+        daemon=True
+    )
     web_thread.start()
 
-    # Telegram bot
+    # Bot
     asyncio.run(main())
