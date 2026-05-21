@@ -1298,27 +1298,21 @@ async def main():
 
     print("🚀 Dastyor bot ishga tushdi...")
 
-    # eski webhook/pollinglarni tozalash
     await bot.delete_webhook(
         drop_pending_updates=True
     )
 
-    # polling
-    await dp.start_polling(
-        bot,
-        skip_updates=True
-    )
+    await dp.start_polling(bot)
+
+# =========================
+# START
+# =========================
 
 if __name__ == "__main__":
 
     from threading import Thread
 
-    # Flask server
-    web_thread = Thread(
-        target=run_web,
-        daemon=True
-    )
+    web_thread = Thread(target=run_web)
     web_thread.start()
 
-    # Bot
     asyncio.run(main())
