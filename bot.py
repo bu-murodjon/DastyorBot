@@ -1312,7 +1312,11 @@ if __name__ == "__main__":
 
     from threading import Thread
 
-    web_thread = Thread(target=run_web)
+    web_thread = Thread(
+        target=run_web,
+        daemon=True
+    )
+
     web_thread.start()
 
     asyncio.run(main())
