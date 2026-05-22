@@ -1288,19 +1288,16 @@ async def main():
 
     print("🚀 Dastyor bot ishga tushdi...")
 
-    await bot.delete_webhook(
-        drop_pending_updates=True
+    try:
+        await bot.delete_webhook(
+            drop_pending_updates=True
+        )
+    except Exception as e:
+        print(e)
+
+    await asyncio.sleep(5)
+
+    await dp.start_polling(
+        bot,
+        skip_updates=True
     )
-
-    await dp.start_polling(bot)
-
-if __name__ == "__main__":
-
-    web_thread = Thread(
-        target=run_web,
-        daemon=True
-    )
-
-    web_thread.start()
-
-    asyncio.run(main())
