@@ -1263,7 +1263,6 @@ async def back_to_menu(message: Message, state: FSMContext):
 # =========================
 
 from flask import Flask
-from threading import Thread
 import os
 
 app = Flask(__name__)
@@ -1281,6 +1280,7 @@ def run_web():
     app.run(
         host="0.0.0.0",
         port=port,
+        debug=False,
         use_reloader=False
     )
 
@@ -1289,12 +1289,26 @@ async def main():
     print("🚀 Dastyor bot ishga tushdi...")
 
     try:
+
         await bot.delete_webhook(
             drop_pending_updates=True
         )
+
     except Exception as e:
-        print(e)
+
+        print(f"Webhook error: {e}")
 
     await asyncio.sleep(5)
 
     await dp.start_polling(bot)
+
+if __name__ == "__main__":
+
+    web_thread = Thread(
+        target=run_web,
+        daemon=True
+    )
+
+    web_thread.start()
+
+    asyncio.run(main())
