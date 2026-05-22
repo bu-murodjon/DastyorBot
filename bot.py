@@ -1255,7 +1255,7 @@ async def back_to_menu(message: Message, state: FSMContext):
     )
 
 # =========================
-# WEBHOOK CONFIGURATION
+# WEBHOOK CONFIGURATION (TO'G'RILANGAN VERSUYA)
 # =========================
 
 import os
@@ -1263,7 +1263,6 @@ from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_applicati
 from aiohttp import web
 
 # Render sizga bergan asosiy URL (Masalan: https://dastyor-delivery.onrender.com)
-# Buni Render panelidan olib, config.py ga qo'shishingiz yoki shu yerga yozishingiz mumkin
 RENDER_EXTERNAL_URL = os.environ.get("RENDER_EXTERNAL_URL", "https://SIZNING_APP_NOMINGIZ.onrender.com")
 WEBHOOK_PATH = f"/webhook/{BOT_TOKEN}"
 WEBHOOK_URL = f"{RENDER_EXTERNAL_URL}{WEBHOOK_PATH}"
@@ -1281,22 +1280,25 @@ async def on_startup(bot: Bot) -> None:
     )
 
 def main():
-    """Botni Webhook orqali ishga tushirish (Flask kerak emas)"""
-    # 1. Webhook so'rovlarini aiogram dispatcherga yo'naltirish
+    """Botni Webhook orqali ishga tushirish"""
+    # 1. aiohttp veb ilovasini yaratish
+    app = web.Application()
+
+    # 2. Webhook so'rovlarini aiogram dispatcherga yo'naltirish
+    # DIQQAT: Bu yerda birinchi argument dp emas, app bo'lishi shart!
     webhook_requests_handler = SimpleRequestHandler(
         dispatcher=dp,
         bot=bot
     )
-    webhook_requests_handler.register(dp, path=WEBHOOK_PATH)
+    webhook_requests_handler.register(app, path=WEBHOOK_PATH)
 
-    # 2. aiogram startup funksiyasini ulash
+    # 3. aiogram startup funksiyasini ulash
     dp.startup.register(on_startup)
 
-    # 3. aiohttp veb ilovasini yaratish
-    app = web.Application()
+    # 4. lova va botni bir-biriga ulash
     setup_application(app, dp, bot=bot)
 
-    # 4. Serverni Render kutayotgan portda ishga tushirish
+    # 5. Serverni Render kutayotgan portda ishga tushirish
     print(f"🌐 Server portda eshityapti: {WEB_SERVER_PORT}")
     web.run_app(
         app, 
