@@ -1263,13 +1263,14 @@ async def back_to_menu(message: Message, state: FSMContext):
 # =========================
 
 from flask import Flask
+from threading import Thread
 import os
 
 app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "Dastyor bot ishlayapti!"
+    return "Bot alive"
 
 def run_web():
     port = int(os.environ.get("PORT", 10000))
@@ -1281,42 +1282,23 @@ def run_web():
         use_reloader=False
     )
 
-# =========================
-# MAIN
-# =========================
-
 async def main():
 
     print("🚀 Dastyor bot ishga tushdi...")
 
-    # webhookni o'chirish
     await bot.delete_webhook(
         drop_pending_updates=True
     )
 
-    # polling
-    await dp.start_polling(
-        bot,
-        skip_updates=True
-    )
-
-# =========================
-# START
-# =========================
+    await dp.start_polling(bot)
 
 if __name__ == "__main__":
 
-    # Flask faqat 1 thread
-    # web_thread = Thread(
-#     target=run_web,
-#     daemon=True
-# )
+    web_thread = Thread(
+        target=run_web
+    )
 
-# web_thread.start()
+    web_thread.daemon = True
+    web_thread.start()
 
-    # Bot
-    try:
-        asyncio.run(main())
-
-    except KeyboardInterrupt:
-        print("⛔ Bot to'xtadi")
+    asyncio.run(main())
