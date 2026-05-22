@@ -1292,6 +1292,8 @@ def main():
     )
     webhook_requests_handler.register(app, path=WEBHOOK_PATH)
 
+    app.router.add_get("/", lambda request: web.Response(text="Bot ishlayapti!"))
+    
     # 3. aiogram startup funksiyasini ulash
     dp.startup.register(on_startup)
 
