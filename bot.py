@@ -1273,12 +1273,14 @@ def home():
     return "Bot alive"
 
 def run_web():
+
     port = int(os.environ.get("PORT", 10000))
+
+    print(f"🌐 Flask port: {port}")
 
     app.run(
         host="0.0.0.0",
         port=port,
-        debug=False,
         use_reloader=False
     )
 
@@ -1295,10 +1297,10 @@ async def main():
 if __name__ == "__main__":
 
     web_thread = Thread(
-        target=run_web
+        target=run_web,
+        daemon=True
     )
 
-    web_thread.daemon = True
     web_thread.start()
 
     asyncio.run(main())
