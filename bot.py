@@ -1307,12 +1307,12 @@ async def main():
 if __name__ == "__main__":
 
     # Flask faqat 1 thread
-    web_thread = Thread(
-        target=run_web,
-        daemon=True
-    )
+    # web_thread = Thread(
+#     target=run_web,
+#     daemon=True
+# )
 
-    web_thread.start()
+# web_thread.start()
 
     # Bot
     try:
