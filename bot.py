@@ -1,6 +1,5 @@
 import asyncio
 
-from flask import Flask
 from threading import Thread
 from datetime import datetime
 from aiogram import Bot, Dispatcher, F
@@ -113,16 +112,6 @@ async def start_handler(message: Message):
 
     await message.answer(
         text,
-        reply_markup=main_keyboard
-    )
-
-@dp.message(F.text == "⬅️ Orqaga")
-async def back_handler(message: Message, state: FSMContext):
-
-    await state.clear()
-
-    await message.answer(
-        "🏠 Bosh menyu",
         reply_markup=main_keyboard
     )
 
@@ -1252,6 +1241,20 @@ async def find_order(message: Message):
     await message.answer(text)
 
 # =========================
+# ORQAGA
+# =========================
+
+@dp.message(F.text == "⬅️ Orqaga")
+async def back_to_menu(message: Message, state: FSMContext):
+
+    await state.clear()
+
+    await message.answer(
+        "🏠 Asosiy menyu",
+        reply_markup=main_keyboard
+    )
+
+# =========================
 # FLASK KEEP ALIVE
 # =========================
 
@@ -1274,40 +1277,28 @@ def run_web():
     app.run(
         host="0.0.0.0",
         port=port,
+        debug=False,
         use_reloader=False
-    )
-
-# =========================
-# ORQAGA
-# =========================
-
-@dp.message(F.text == "⬅️ Orqaga")
-async def back_to_menu(message: Message, state: FSMContext):
-
-    await state.clear()
-
-    await message.answer(
-        "🏠 Asosiy menyu",
-        reply_markup=main_keyboard
     )
 
 # =========================
 # MAIN
 # =========================
 
-# =========================
-# START
-# =========================
-
 async def main():
 
     print("🚀 Dastyor bot ishga tushdi...")
 
+    # webhookni o'chirish
     await bot.delete_webhook(
         drop_pending_updates=True
     )
 
-    await dp.start_polling(bot)
+    # polling
+    await dp.start_polling(
+        bot,
+        skip_updates=True
+    )
 
 # =========================
 # START
@@ -1315,8 +1306,7 @@ async def main():
 
 if __name__ == "__main__":
 
-    from threading import Thread
-
+    # Flask faqat 1 thread
     web_thread = Thread(
         target=run_web,
         daemon=True
@@ -1324,4 +1314,9 @@ if __name__ == "__main__":
 
     web_thread.start()
 
-    asyncio.run(main())
+    # Bot
+    try:
+        asyncio.run(main())
+
+    except KeyboardInterrupt:
+        print("⛔ Bot to'xtadi")
