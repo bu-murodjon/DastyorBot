@@ -1255,60 +1255,54 @@ async def back_to_menu(message: Message, state: FSMContext):
     )
 
 # =========================
-# FLASK KEEP ALIVE
+# WEBHOOK CONFIGURATION
 # =========================
 
-# =========================
-# FLASK
-# =========================
-
-from flask import Flask
 import os
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+from aiohttp import web
 
-app = Flask(__name__)
+# Render sizga bergan asosiy URL (Masalan: https://dastyor-delivery.onrender.com)
+# Buni Render panelidan olib, config.py ga qo'shishingiz yoki shu yerga yozishingiz mumkin
+RENDER_EXTERNAL_URL = os.environ.get("RENDER_EXTERNAL_URL", "https://SIZNING_APP_NOMINGIZ.onrender.com")
+WEBHOOK_PATH = f"/webhook/{BOT_TOKEN}"
+WEBHOOK_URL = f"{RENDER_EXTERNAL_URL}{WEBHOOK_PATH}"
 
-@app.route("/")
-def home():
-    return "Bot alive"
+# Render taqdim etadigan PORT (Odatda 10000)
+WEB_SERVER_HOST = "0.0.0.0"
+WEB_SERVER_PORT = int(os.environ.get("PORT", 10000))
 
-def run_web():
-
-    port = int(os.environ.get("PORT", 10000))
-
-    print(f"🌐 Flask port: {port}")
-
-    app.run(
-        host="0.0.0.0",
-        port=port,
-        debug=False,
-        use_reloader=False
+async def on_startup(bot: Bot) -> None:
+    """Bot ishga tushganda webhookni o'rnatish"""
+    print(f"🚀 Webhook o'rnatilmoqda: {WEBHOOK_URL}")
+    await bot.set_webhook(
+        url=WEBHOOK_URL,
+        drop_pending_updates=True
     )
 
-async def main():
+def main():
+    """Botni Webhook orqali ishga tushirish (Flask kerak emas)"""
+    # 1. Webhook so'rovlarini aiogram dispatcherga yo'naltirish
+    webhook_requests_handler = SimpleRequestHandler(
+        dispatcher=dp,
+        bot=bot
+    )
+    webhook_requests_handler.register(dp, path=WEBHOOK_PATH)
 
-    print("🚀 Dastyor bot ishga tushdi...")
+    # 2. aiogram startup funksiyasini ulash
+    dp.startup.register(on_startup)
 
-    try:
+    # 3. aiohttp veb ilovasini yaratish
+    app = web.Application()
+    setup_application(app, dp, bot=bot)
 
-        await bot.delete_webhook(
-            drop_pending_updates=True
-        )
-
-    except Exception as e:
-
-        print(f"Webhook error: {e}")
-
-    await asyncio.sleep(5)
-
-    await dp.start_polling(bot)
+    # 4. Serverni Render kutayotgan portda ishga tushirish
+    print(f"🌐 Server portda eshityapti: {WEB_SERVER_PORT}")
+    web.run_app(
+        app, 
+        host=WEB_SERVER_HOST, 
+        port=WEB_SERVER_PORT
+    )
 
 if __name__ == "__main__":
-
-    web_thread = Thread(
-        target=run_web,
-        daemon=True
-    )
-
-    web_thread.start()
-
-    asyncio.run(main())
+    main()
